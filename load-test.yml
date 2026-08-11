@@ -2,8 +2,8 @@ config:
   target: "http://localhost:3000"
   phases:
     - duration: 30
-      arrivalRate: 10
-      name: "Baseline load test"
+      arrivalRate: 50
+      name: "Heavy load test"
   defaults:
     headers:
       Content-Type: "application/json"

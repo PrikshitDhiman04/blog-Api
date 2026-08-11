@@ -6,10 +6,15 @@ async function createPost(title, content, userId) {
   return { id: result.id, title, content, user_id: userId };
 }
 
-async function getAllPosts() {
-  const sql = "SELECT * FROM posts ORDER BY created_at DESC";
-  return await all(sql);
-}
+// async function getAllPosts() {
+//   const sql = "SELECT * FROM posts ORDER BY created_at DESC";
+//   return await all(sql);
+// }
+async function getAllPosts(limit = 20, offset = 0) {
+  const sql = "SELECT * FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?";
+  return await all(sql, [limit, offset]);
+}  //bottleneck fixed
+
 
 async function getPostById(id) {
   const sql = "SELECT * FROM posts WHERE id = ?";

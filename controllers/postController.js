@@ -7,6 +7,9 @@ const {
 } = require("../models/postModel");
 const { findUserById } = require("../models/userModel");
 
+let postsCache = { data: null, timestamp: null };
+const CACHE_TTL = 30000; // 30 seconds
+
 // CREATE a new post
 async function create(req, res) {
   try {
@@ -33,6 +36,8 @@ async function create(req, res) {
     }
 
     const newPost = await createPost(title, content, user_id);
+    // Invalidate cache when a new post is created
+    postsCache = { data: null, timestamp: null };
     return res.status(201).json(newPost);
   } catch (err) {
     console.error(err);
@@ -44,10 +49,26 @@ async function create(req, res) {
   }
 }
 
-// READ all posts
+
 async function getAll(req, res) {
   try {
-    const posts = await getAllPosts();
+    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || 1;
+    const offset = (page - 1) * limit;
+
+    const cacheKey = `${limit}-${page}`;
+    const now = Date.now();
+
+    if (
+      postsCache.data &&
+      postsCache.key === cacheKey &&
+      now - postsCache.timestamp < CACHE_TTL
+    ) {
+      return res.status(200).json(postsCache.data);
+    }
+
+    const posts = await getAllPosts(limit, offset);
+    postsCache = { data: posts, timestamp: now, key: cacheKey };
     return res.status(200).json(posts);
   } catch (err) {
     console.error(err);
@@ -58,6 +79,7 @@ async function getAll(req, res) {
       });
   }
 }
+
 
 // READ a single post by id
 async function getOne(req, res) {

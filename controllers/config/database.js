@@ -8,7 +8,7 @@ const SCHEMA_PATH = path.join(__dirname, "..", "db", "schema.sql");
 const db = new sqlite3.Database(DB_PATH);
 
 
-
+db.run("PRAGMA foreign_keys = ON");
 
 
 const schema = fs.readFileSync(SCHEMA_PATH, "utf8");
